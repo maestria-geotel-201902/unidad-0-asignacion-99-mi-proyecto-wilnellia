@@ -12,8 +12,8 @@ title: |
         
 author:
 - name:  Aleira Del Jesús, Grace Soriano, Wilnellia Fabián
-  affiliation: Estudiantes, Universidad Autónoma de Santo Domingo (UASD)
-abstract: "Resumen. Los cambios que se producen en el clima anualmente o de un periodo a otro, se lo podemos atribuir tanto a la variabilidad natural del clima como al cambio que es ocasionado por las actividades antropogénicas. Para poder obtener la significancia de los cambios observados en las provincias de la República Dominica, se analizó la variabilidad pluviométrica de la precipitación, correspondiente al año 1994." 
+  affiliation: Estudiantes de la Mestría en Teledetección y Ciencias de la Información Geográfica, Universidad Autónoma de Santo Domingo (UASD).
+abstract: "Resumen. El clima anualmente se ve afectado por los cambios que se producen en la superficie terrestre. Estos se los podemos atribuir, tanto al impacto humano como a la naturaleza. La precipitación es una parte muy importante de la composición del ciclo hidrológico, es por ello, que en la actualidad existe gran interés por conocer los factores que controlan el clima, en virtud del incremento en los desastres naturales que afectan la población. Por lo que, con la finalidad de poder obtener conocimiento sobre el valor trascendental de los cambios observados en las provincias de la República Dominicana, se analizó la variabilidad pluviométrica de la precipitación, correspondiente al año 1994." 
 keywords: "Variabilidad Pluviométrica, Precipitación,Clima"
 date: "`r format(Sys.time(), '%Enero %17, %2020')`"
 geometry: margin=1in
@@ -54,6 +54,7 @@ prov
 prov <- st_read(dsn = 'data/divisionRD.gpkg', layer = 'PROVCenso2010')
 plot(prov['PROV'])
 
+#Verificamos el sistema de coordenadas que poseen los datos. De ser necesario lo transformamos al 32619.
 st_crs(prep)
 crsdestino <- 32619
 preputm <- prep %>% st_transform(crs = crsdestino)
@@ -61,25 +62,48 @@ preputm
 
 ```
 # Introducción
-Una de las partes más importante del ciclo hidrológico es la precipitación. Esta lleva el agua dulce a la parte emergida de la corteza terrestre y, por ende, favorece la vida en nuestro planeta. La precipitación se genera en las nubes, cuando alcanzan un punto de saturación; en este punto las gotas de agua aumentan de tamaño hasta alcanzar una masa en que se precipitan por la fuerza de gravedad.
+La Finalidad de realizar este proyecto, es lograr conocer la variabilidad en la precipitación pluvial en la República Dominicana, específicamente para el año 1994. Con el objetivo de conocer la cantidad de lluvia en cada provincia durante ese período, dicha información nos permite identificar las zonas vulnerables a inundaciones o deslizamiento ante un fenómeno atmoférico.
+
+
+Desarrollaremos nuestro trabajo mediante el Análisis Geoestadístico, el cual está basado en el hecho de que los datos esten correlacionados espacialmente, o sea, que un dato va a estar relacionado con otros datos cercanos, por lo que, a medida que nos alejamos del dato, esta dependencia va perdiendo fuerza. En ese mismo sentido, podemos decir, que la geoestadística, es una ciencia aplicada, la cual estudia las variables que se distribuyen espacialmente y toma muestras que son referencias del fenómeno objeto de estudio. 
+
+
+Según artículo publicado por @article{garcía2009variabilidad, dice que los cambios climáticos anuales y de un periodo a otro se pueden atribuir tanto a la variabilidad natural del clima como al cambio ocasionado por las actividades antropogénicas, por lo que, es importante conocer las zonas de nuestro país que son vulnerables a esos cambios.
 
 # Metodología
--Utilizamos la aplicación Rstudio para el desarrollo de nuestro proyecto. 
+-Utilizamos el entorno de programación estadística R y el entorno de desarrollo integrado RStudio para el progreso de nuestro proyecto. 
+
 
 -Clonamos desde el Github la carpeta de "mi proyecto", la cual contiene los datos correspondientes para realizar los análisis espaciales.
 
+
 -Los datos fueron suministrados por el profesor, el cual los obtuvo a través de la Oficina Nacional de Meteorrologia (ONAMET), que es el ente encargado de regulador la investigación y producción de la información meteorológica en el país.
 
-Trabajamos con los datos de las precipitaciones del año 1994, de la siguiente tabla:
+
+-Haciendo una evaluación de los datos proporcionados, decidimos trabajar con el año 1994, ya que posee pocos datos perdidos, lo que a nuestro entender arrojaría buenos resultados.
+
+
+-Realizamos una serie de cálculos previos, a efectuar la interpolación por Kriging oridinario, como es, el cálculo de los Variogramas Muestrales y de los Variogramas Modelos, para luego obtener un resultado respecto a los datos analizados.
+
+
+-Los datos de las precipitaciones del año 1994, fueron extraídos de la siguiente tabla:
 
 ```{r}
 prep %>% st_drop_geometry()
 ```
 
 # Resultados
-Los datos de preciciptacion analizados presentaron distribucion normal, es decir, que la muestra tiene un incremento gradual de la semivarianza hasta que se alcanza la meseta en el rango, por lo que, la semivarianza inicia en cero o cercana a éste para el intervalo de distancia cero.
+
+En el análisis realizado de los datos de precipitación, podemos visualizar mediante el variograma que los mismos tienen un incremento gradual de la semivarianza hasta que se alcanza la meseta en el rango, por lo que, la semivarianza inicia en cero o cercana a éste. Por ende, existe autocorrelación espacial.
+
+En el histograma visualiza que los datos están sesgado hacia la derecha con relación a su distribución. En ese mismo orden, podemos resaltar que en el país tenemos 25 observatorios, de los cuales para ese año sólo 2 tienen datos no encontrados.
+
+El mapa generado nos muestra que  el valor de la precipatación para ese año oscila entre 700-1000, notándose que las provincias donde tuvieron una precipitación mayor durante ese período fueron las que poseen el color azul mas intenso, algunas de ellas son: Sánchez Ramírez, Espaillat, Monte Plata, Distrito Nacional, Hato Mayor y San Pedro de Macoris, y las que poseen un color azul menos intenso, indican que la precipitación fue menor, pudiendo mencionar dentro de esta a Monte Cristi, Santiago, Azua y Pedernales, entre otras.
+
 
 ```{r}
+#ESTADÍSTICOS BÁSICOS PARA EL AÑO 1994.
+
 nrow(preputm)
 summary(preputm$a1994)
 hist(preputm$a1994)
@@ -88,18 +112,11 @@ shapiro.test(preputm$a1994)
 shapiro.test(log(prep$a1994))
 ```
 # Discusión o Conclusiones
-El comportamiento de nuestros datos arrojan que el p-valor > 0.05, por lo que, podemos afirmar con un 95% de confianza que nuestros datos se ajustan a una distribución normal. Además, el grafico nos muestra que la semivarianza aumenta gradualmente hasta alcanzar el rango.
 
-El objetivo principal del Análisis Geoestadístico, es aplicar las técnicas Kriging, realizando para ello la serie de cálculos previos, como el cálculo de los Variogramas Muestrales y de los Variogramas Modelos. Luego, aplicamos la interpolación por Kriging oridinario para obtener un resultado respecto a los datos analizados. Por ende, podemos concluir que los datos visualizados a través de los variogramas muestrales generados indican que tienen un Comportamiento Cuadrático, ya que estos representan variables continuas e infinitamente diferenciales, por lo que no puede cambiar rápidamente.
+A partir de los resultados obtenidos para el año 1994, concluimos que los datos visualizados a través de los variogramas muestrales generados del ajuste del variograma modelo, indican que tienen un incremento gradual hasta alcanzar el rango, por lo que podemos concluir que  nuestros datos arrojan un 95% de confianza, ya que p-valor > 0.05.
 
-# Información de soporte
-La Geoestadística es una ciencia cada vez más usada en distintos ámbitos científicos. Nació en la década de los 50 como una ciencia minera, con el fin de evaluar las reservas minerales útiles. Por lo tanto, es una ciencia joven, en pleno desarrollo. El término fue concebido por Georges Matheron.
+Se llevó acabo la realización del Análisis Geoestadístico, con el objetivo principal de emplear la técnica Kriging Ordinario, para así poder obtener una predicción de los valores desconocidos de la precipitación correspodiente al año 1994, con la finalidad de poder identificar las provincias que son vulnerables a los fenómenos atmoféricos. En aras, de que el país pueda establecer las medidas necesarias ante un evento inesperado. 
 
-La Geoestadística se basa en el hecho de que los datos van a estar correlacionados espacialmente, es decir, que un dato va a estar relacionado con datos cercanos, y esta dependencia va perdiendo fuerza a medida que nos alejamos del dato. Por ende, es una ciencia aplicada que estudia las variables distribuidas espacialmente, partiendo de una muestra representativa del fenómeno en estudio.
-
-Como toda ciencia estadística, el objetivo de la Geoestadística, es la predicción. Para esto, se suelen aplicar las técnicas Kriging, que básicamente proporcionan una predicción, es decir, del valor en una posición espacial, a partir de una muestra dada. Para conseguir dicha estimación, primero ha de caracterizarse la relación de dependencia entre las distintas localizaciones espaciales; en este sentido, puede recurrirse a la estimación del covariograma o del variograma. 
-
-@article{garcía2009variabilidad,
 
 # *Script* reproducible
 ```{r, echo=T}
@@ -114,6 +131,7 @@ library(ggplot2)
 library(gstat)
 library(stars)
 
+#Cargamos los datos correspondientes a las provincias y los observatorios
 rutaprep <- 'data/onamet_prec_anual_sf.gpkg'
 rutadiv <- 'data/divisionRD.gpkg'
 st_layers(rutaprep)
@@ -131,6 +149,7 @@ crsdestino <- 32619
 preputm <- prep %>% st_transform(crs = crsdestino)
 preputm
 
+#Estadísticos Básicos del año 1994.
 nrow(preputm)
 summary(preputm$a1994)
 hist(preputm$a1994)
@@ -142,6 +161,7 @@ prep1994 <- na.omit(preputm[,c('Estación', 'a1994')])
 prep1994$a1994log <- log(prep1994$a1994)
 prep1994
 
+#Ilustraciónde los Observatorios correspondiente  a la precipitación
 ggplot() +
   geom_sf(data = prov, fill = 'white') +
   geom_sf(data = prep1994, aes(col = a1994log), size = 6) +
@@ -150,10 +170,12 @@ ggplot() +
   geom_sf_text(data = prep1994, aes(label=Estación), check_overlap = T, size = 1.5) +
   theme_bw()
 
+#Viariograma Muestral
 v1994 <- variogram(a1994log~1, prep1994)
 v1994
 plot(v1994, plot.numbers = T)
 
+#Generamos varios variogramas con la finalidad de elegir el que utilizaremos en la interpolación del Kriging Ordinario.
 v1994_m <- fit.variogram(v1994, vgm(model = "Sph", range = 50000))
 v1994_m
 plot(v1994, v1994_m, plot.numbers = T)
@@ -177,6 +199,7 @@ grd <- st_bbox(prov) %>%
 grd
 plot(grd)
 
+#Generamos una cuadrícula para RD y sobre ella realizamos el Kriging ordinario.
 k <- krige(formula = a1994log~1, locations = prep1994, newdata = grd, model = v1994_m3)
 k
 plot(k)
@@ -198,3 +221,21 @@ ggplot() +
   theme_bw()
 ```
 # Referencias
+
+Análisis espacial con R: Usa R como un Sistema de Información Geográfica, de JEAN-FRANCOIS MAS.
+
+http://onamet.gob.do/index.php/sobre-nosotros/quienes-somos
+
+http://www.scielo.org.mx/scielo.php?script=sci_arttext&pid=S1405-31952009000100001
+
+https://www.sgapeio.es/INFORMEST/VICongreso/artigos/sesion1_04.pdf
+
+https://prezi.com/l7zplkrgogbo/proyecto-de-investigacio-sobre-precipitacion-pluvial/
+
+https://www.academia.edu/17328936/CARACTERISTICAS_VARIOGRAMA
+
+https://acolita.com/geoestadistica-interpolacion-con-kriging/
+
+https://www.monografias.com/docs114/principios-variogramas/principios-variogramas3.shtml
+
+https://volaya.github.io/libro-sig/chapters/Estadistica_espacial.html
